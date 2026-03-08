@@ -1,7 +1,20 @@
-import React from "react";
-import { Image, Text, View, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { Image, Text, View, StyleSheet, TouchableOpacity } from "react-native";
 
 const Tarjeta_Post = () =>{
+
+    const [liked, setLiked] = useState(false);
+    const [likes, setLikes] = useState(0);
+
+    const toggleLike = () => {
+        if(liked){
+            setLikes(likes - 1);
+        }else{
+            setLikes(likes + 1);
+        }
+        setLiked(!liked);
+    };
+
     return(
         <View style={styles.card}>
 
@@ -35,6 +48,17 @@ const Tarjeta_Post = () =>{
                     <View style={[styles.badge, styles.badgeSecondary]}>
                         <Text style={styles.badgeText}>🔥 Media</Text>
                     </View>
+
+                    <TouchableOpacity
+                        style={styles.likeContainer}
+                        onPress={toggleLike}
+                    >
+                        <Text style={styles.likeText}>
+                            {liked ? "❤️" : "🤍"}
+                        </Text>
+                        <Text style={styles.likeCount}>{likes}</Text>
+                    </TouchableOpacity>
+
                 </View>
             </View>
 
@@ -88,6 +112,7 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         marginTop: 15,
     },
     badge: {
@@ -104,6 +129,18 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: "600",
     },
+    likeContainer:{
+        flexDirection:"row",
+        alignItems:"center",
+        gap:5
+    },
+    likeText:{
+        fontSize:20
+    },
+    likeCount:{
+        fontSize:14,
+        fontWeight:"600"
+    }
 });
 
 export default Tarjeta_Post;

@@ -8,6 +8,8 @@ import Subir_Post from './src/pantallas/Subir_Post';
 import Perfil from './src/pantallas/Perfil';
 import Editar_Perfil from './src/pantallas/Editar_Perfil';
 import Notificaciones from './src/pantallas/Notificaciones';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export type RootStackParamList = {
@@ -23,9 +25,28 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
+
+  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | null>(null);
+
+  useEffect(() => {
+    const checkUsuario = async () => {
+      try {
+        const usuario = await AsyncStorage.getItem('usuario'); // 👈 usa tu key exacta
+        setInitialRoute(usuario ? 'Inicio' : 'Inicio_Sesion');
+      } catch {
+        setInitialRoute('Inicio_Sesion');
+      }
+    };
+    checkUsuario();
+  }, []);
+
+  // Espera hasta saber qué ruta usar
+  if (!initialRoute) return null;
+
+
   return(
     <NavigationContainer>
-      <Stack.Navigator initialRouteName='Inicio_Sesion'>
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen 
             name="Inicio_Sesion" 
             component={Inicio_Sesion} 

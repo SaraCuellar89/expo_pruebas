@@ -1,11 +1,35 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ScrollView, View, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Tarjeta_Post from "../componentes/Tarjeta_Post";
 import Menu from "../componentes/Menu";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const Inicio = () => {
+
+    useEffect(() => {
+        const Obtener_Platos = async () => {
+
+            const usuarioStr = await AsyncStorage.getItem("usuario");
+            const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+            const token = usuario?.token;
+    
+            const res = await fetch('http://3.140.94.115:3001/publicaciones/todas', {
+                method: "GET",
+                headers: {
+                Authorization: `Bearer ${token}`
+                }
+            })
+
+            const datos = await res.json()
+
+            console.log(datos)
+        } 
+
+        Obtener_Platos()
+    }, [])
+
     return(
         <SafeAreaView style={styles.safeArea}>
             

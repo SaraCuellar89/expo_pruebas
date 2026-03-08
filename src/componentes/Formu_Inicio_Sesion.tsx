@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View, StyleSheet, Alert } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import Mensaje from "./mensaje";
 
 GoogleSignin.configure({
     webClientId: '354612197459-c5q1pro6hi6nicq41lelu9ishds5a8qj.apps.googleusercontent.com',
@@ -12,6 +13,17 @@ GoogleSignin.configure({
 const Formu_Inicio_Sesion = () => {
 
     const navigation = useNavigation<NativeStackNavigationProp<any>>();
+
+    // =============== Estados para mensaje ===============
+    const [mostrar, setMostrar] = useState(false);
+    const [textoMensaje, setTextoMensaje] = useState("");
+
+    // Función helper para mostrar el mensaje
+    const mostrarMensaje = (texto: string) => {
+        setTextoMensaje(texto);
+        setMostrar(true);
+    };
+
 
     // =============== Iniciar Sesion de manera local ===============
     const [correo, setCorreo] = useState("");
@@ -28,12 +40,10 @@ const Formu_Inicio_Sesion = () => {
             });
 
             if(!res.ok){
-                return Alert.alert('No se pudo iniciar sesion');
+                return mostrarMensaje("No se pudo iniciar sesión")
             }
 
             const datos = await res.json();
-
-            console.log(datos)
 
             // Guardar token
             await AsyncStorage.setItem("token", datos.data.token);
@@ -63,7 +73,7 @@ const Formu_Inicio_Sesion = () => {
             const userInfo = await GoogleSignin.signIn();
             const idToken = userInfo.data?.idToken;
 
-            if (!idToken) return Alert.alert('No se pudo obtener el token de Google');
+            if (!idToken) return mostrarMensaje("Error al iniciar sesion con Google");
 
             const res = await fetch('http://3.140.94.115:3001/usuarios/iniciar_sesion_google', {
                 method: 'POST',
@@ -71,7 +81,7 @@ const Formu_Inicio_Sesion = () => {
                 body: JSON.stringify({ token: idToken })
             });
 
-            if (!res.ok) return Alert.alert('No se pudo iniciar sesión con Google');
+            if (!res.ok) return mostrarMensaje("No se pudo iniciar sesión con Google");
 
             const datos = await res.json();
 
@@ -93,6 +103,14 @@ const Formu_Inicio_Sesion = () => {
 
     return(
         <View style={styles.container}>
+
+            <Mensaje
+                visible={mostrar}
+                mensaje={textoMensaje}
+                duracion={3000}
+                onOcultar={() => setMostrar(false)}
+            />
+
             <Text style={styles.title}>Inicio de Sesión</Text>
 
             <View style={styles.inputContainer}>

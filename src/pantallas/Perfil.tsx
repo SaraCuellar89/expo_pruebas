@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Tarjeta_Perfil from "../componentes/Tarjet_Perfil";
 import Menu from "../componentes/Menu";
 
 const Perfil = () => {
+
     return(
         <SafeAreaView style={styles.safeArea}>
             
