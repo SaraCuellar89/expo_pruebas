@@ -10,6 +10,9 @@ import Editar_Perfil from './src/pantallas/Editar_Perfil';
 import Notificaciones from './src/pantallas/Notificaciones';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
+import { Alert } from 'react-native';
+import { registrarTokenFCM } from './src/helpers/Registrar_Token';
 
 
 export type RootStackParamList = {
@@ -22,23 +25,44 @@ export type RootStackParamList = {
   Notificaciones: undefined,
 }
 
+// Notificaciones 
+messaging().setBackgroundMessageHandler(async remoteMessage => {
+    console.log('Notificación en background:', remoteMessage);
+});
+
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
 
   const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList | null>(null);
 
-  useEffect(() => {
-    const checkUsuario = async () => {
-      try {
-        const usuario = await AsyncStorage.getItem('usuario'); // 👈 usa tu key exacta
-        setInitialRoute(usuario ? 'Inicio' : 'Inicio_Sesion');
-      } catch {
-        setInitialRoute('Inicio_Sesion');
-      }
-    };
-    checkUsuario();
-  }, []);
+    useEffect(() => {
+        // ✅ Verificar usuario guardado
+        const checkUsuario = async () => {
+            try {
+                const usuario = await AsyncStorage.getItem('usuario');
+                setInitialRoute(usuario ? 'Inicio' : 'Inicio_Sesion');
+                if (usuario) {
+                await registrarTokenFCM();
+            }
+            } catch {
+                setInitialRoute('Inicio_Sesion');
+            }
+        };
+        checkUsuario();
+
+        const unsubscribeForeground = messaging().onMessage(async remoteMessage => {
+            console.log('Notificación en foreground:', remoteMessage);
+            // Mostrar alerta manual porque Firebase no la muestra en foreground
+            Alert.alert(
+                remoteMessage.notification?.title ?? 'Nueva notificación',
+                remoteMessage.notification?.body ?? ''
+            );
+        });
+
+        return () => unsubscribeForeground();
+    }, []);
 
   // Espera hasta saber qué ruta usar
   if (!initialRoute) return null;

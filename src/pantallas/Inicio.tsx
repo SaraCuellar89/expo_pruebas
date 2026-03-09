@@ -1,12 +1,27 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, StyleSheet, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Tarjeta_Post from "../componentes/Tarjeta_Post";
 import Menu from "../componentes/Menu";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Mensaje from "../componentes/mensaje";
 
 
 const Inicio = () => {
+
+    // =============== Estados para mensaje ===============
+    const [mostrar, setMostrar] = useState(false);
+    const [textoMensaje, setTextoMensaje] = useState("");
+
+    // Función helper para mostrar el mensaje
+    const mostrarMensaje = (texto: string) => {
+        setTextoMensaje(texto);
+        setMostrar(true);
+    };
+
+
+
+    const [platos, setPlatos] = useState([]);
 
     useEffect(() => {
         const Obtener_Platos = async () => {
@@ -16,22 +31,31 @@ const Inicio = () => {
             const token = usuario?.token;
     
             const res = await fetch('http://3.140.94.115:3001/publicaciones/todas', {
-                method: "GET",
                 headers: {
-                Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`
                 }
             })
 
-            const datos = await res.json()
+            const datos = await res.json();
 
-            console.log(datos)
+            if(!res.ok) return mostrarMensaje("No se mostrar los platos");
+            
+            setPlatos(datos.data);
         } 
 
-        Obtener_Platos()
+        Obtener_Platos();
     }, [])
 
     return(
         <SafeAreaView style={styles.safeArea}>
+
+            <Mensaje
+                visible={mostrar}
+                mensaje={textoMensaje}
+                duracion={3000}
+                onOcultar={() => setMostrar(false)}
+            />
+
             
             <View style={styles.container}>
 
@@ -46,9 +70,9 @@ const Inicio = () => {
                         </Text>
                     </View>
 
-                    <Tarjeta_Post/>
-                    <Tarjeta_Post/>
-                    <Tarjeta_Post/>
+                    {platos.map((plato: any) => (
+                        <Tarjeta_Post key={plato.id_publicacion} plato={plato} />
+                    ))}
 
                     {/* Espacio extra para que el último post no quede tapado */}
                     <View style={{ height: 90 }} />

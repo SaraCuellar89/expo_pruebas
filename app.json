@@ -33,10 +33,14 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/icon.png",
+          "color": "#ffffff",
           "googleServicesFile": "./google-services.json"
         }
       ],
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging"
     ],
     "extra": {
       "eas": {
